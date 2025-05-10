@@ -24,6 +24,16 @@
     <tbody></tbody>
   </table>
 
+  <h2>Water Tank Level</h2>
+  <div id="tankContainer">
+    <div id="tankBar"></div>
+  </div>
+  <p>Remaining time: <span id="tankTime">160</span> minutes</p>
+  <button type="button" onclick="useTank(20)">Use 20 min</button>
+  <button type="button" onclick="useTank(30)">Use 30 min</button>
+  <button type="button" onclick="useTank(40)">Use 40 min</button>
+  <button type="button" onclick="resetTank()">Refill Tank</button>
+
   <p><a href="admin.html">Admin Page &raquo;</a></p>
 
   <script type="module" src="app.js"></script>
