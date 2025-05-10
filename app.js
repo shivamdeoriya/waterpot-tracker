@@ -4,12 +4,13 @@ import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/fireb
 
 // Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyCNtRTYbVYA9sT_-aBiZMFCJtyFeRkKn_U",
-  authDomain: "waterpot-tracker-51832.firebaseapp.com",
-  projectId: "waterpot-tracker-51832",
-  storageBucket: "waterpot-tracker-51832.appspot.com",
-  messagingSenderId: "228325247686",
-  appId: "1:228325247686:web:0d1040c88f61b385b1e5c7"
+  apiKey: "AIzaSyDZePQEZqIGmquwnM7m6VS10wK3d4Fy3po",
+  authDomain: "water-pot-tracker.firebaseapp.com",
+  projectId: "water-pot-tracker",
+  storageBucket: "water-pot-tracker.firebasestorage.app",
+  messagingSenderId: "701527837249",
+  appId: "1:701527837249:web:0f7b594891455e350294c0",
+  measurementId: "G-WL94X6DP4Z"
 };
 
 // Initialize Firebase
@@ -32,41 +33,54 @@ function populateDropdown() {
 
 // Load data from Firestore
 async function loadData() {
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    document.getElementById("lastFilled").innerText =
-      `Last filled by: ${data.lastFilledBy} at ${new Date(data.timestamp).toLocaleString()}`;
-    document.getElementById("nextTurn").innerText = `Next turn: ${data.nextTurn}`;
-  } else {
-    await setDoc(docRef, {
-      lastFilledBy: "None",
-      timestamp: Date.now(),
-      nextTurn: members[0]
-    });
-    loadData();
+  try {
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      document.getElementById("lastFilled").innerText =
+        `Last filled by: ${data.lastFilledBy} at ${new Date(data.timestamp).toLocaleString()}`;
+      document.getElementById("nextTurn").innerText = `Next turn: ${data.nextTurn}`;
+    } else {
+      await setDoc(docRef, {
+        lastFilledBy: "None",
+        timestamp: Date.now(),
+        nextTurn: members[0]
+      });
+      await loadData(); // Recursive call after initialization
+    }
+  } catch (error) {
+    console.error("Error loading data:", error);
+    alert("Failed to load data. Please try again.");
   }
 }
 
 // Handle button click
 async function markFilled() {
-  const name = document.getElementById("memberSelect").value;
+  const select = document.getElementById("memberSelect");
+  const name = select.value;
   if (!name) return alert("Please select your name");
 
-  const currentIndex = members.indexOf(name);
-  const next = members[(currentIndex + 1) % members.length];
+  try {
+    const currentIndex = members.indexOf(name);
+    const next = members[(currentIndex + 1) % members.length];
 
-  await setDoc(docRef, {
-    lastFilledBy: name,
-    timestamp: Date.now(),
-    nextTurn: next
-  });
+    await setDoc(docRef, {
+      lastFilledBy: name,
+      timestamp: Date.now(),
+      nextTurn: next
+    });
 
-  loadData();
+    select.value = ""; // Reset dropdown to default
+    await loadData();
+  } catch (error) {
+    console.error("Error updating data:", error);
+    alert("Failed to update. Please try again.");
+  }
 }
 
 // Init
 window.onload = () => {
   populateDropdown();
   loadData();
+  document.getElementById("fillButton").addEventListener("click", markFilled);
 };
