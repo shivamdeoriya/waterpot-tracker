@@ -3,9 +3,34 @@ body {
   text-align: center;
   padding: 2rem;
   background-color: #f0f8ff;
+  max-width: 600px;
+  margin: auto;
 }
-input, button {
-  padding: 10px;
-  margin: 10px;
+
+select, input, button {
+  padding: 8px;
+  margin: 5px;
   font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+table th, table td {
+  border: 1px solid #aaa;
+  padding: 8px;
+}
+
+ul#memberList {
+  list-style: none;
+  padding: 0;
+}
+
+ul#memberList li {
+  padding: 4px 0;
+  border-bottom: 1px solid #ddd;
 }

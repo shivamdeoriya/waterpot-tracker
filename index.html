@@ -1,20 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Water Pot Tracker</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
 </head>
 <body>
   <h1>💧 Water Pot Tracker</h1>
   <p id="lastFilled">Last filled by: Loading...</p>
   <p id="nextTurn">Next turn: Loading...</p>
 
-  <input type="text" id="nameInput" placeholder="Your name">
-  <button onclick="markFilled()">I Filled the Pot</button>
+  <select id="memberSelect">
+    <option value="" disabled selected>Select your name</option>
+  </select>
+  <button type="button" onclick="markFilled()">I Filled the Pot</button>
 
-  <script src="app.js"></script>
+  <h2>Round History</h2>
+  <table id="historyTable">
+    <thead>
+      <tr><th>Who</th><th>When</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <p><a href="admin.html">Admin Page &raquo;</a></p>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

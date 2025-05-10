@@ -1,86 +1,88 @@
 // Firebase v10+ Modular SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Firebase config
+// Firebase config (paste your config here)
 const firebaseConfig = {
-  apiKey: "AIzaSyDZePQEZqIGmquwnM7m6VS10wK3d4Fy3po",
-  authDomain: "water-pot-tracker.firebaseapp.com",
-  projectId: "water-pot-tracker",
-  storageBucket: "water-pot-tracker.firebasestorage.app",
-  messagingSenderId: "701527837249",
-  appId: "1:701527837249:web:0f7b594891455e350294c0",
-  measurementId: "G-WL94X6DP4Z"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
-// Initialize Firebase
+// Initialize Firebase & Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const docRef = doc(db, "tracker", "pot");
 
-const members = ["Person A", "Person B", "Person C", "Person D", "Person E"];
+let members = [], history = [];
 
-// Populate dropdown
+// Populate user dropdown
 function populateDropdown() {
-  const select = document.getElementById("memberSelect");
-  members.forEach(name => {
-    const option = document.createElement("option");
-    option.value = name;
-    option.text = name;
-    select.appendChild(option);
+  const sel = document.getElementById("memberSelect");
+  sel.innerHTML = `<option value=\"\" disabled selected>Select your name</option>`;
+  members.forEach(name => sel.add(new Option(name, name)));
+}
+
+// Render round history table
+function renderHistory() {
+  const tbody = document.querySelector("#historyTable tbody");
+  tbody.innerHTML = "";
+  history.forEach(entry => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${entry.name}</td><td>${new Date(entry.timestamp).toLocaleString()}</td>`;
+    tbody.appendChild(tr);
   });
 }
 
-// Load data from Firestore
+// Load or initialize Firestore data
 async function loadData() {
-  try {
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      document.getElementById("lastFilled").innerText =
-        `Last filled by: ${data.lastFilledBy} at ${new Date(data.timestamp).toLocaleString()}`;
-      document.getElementById("nextTurn").innerText = `Next turn: ${data.nextTurn}`;
-    } else {
-      await setDoc(docRef, {
-        lastFilledBy: "None",
-        timestamp: Date.now(),
-        nextTurn: members[0]
-      });
-      await loadData(); // Recursive call after initialization
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) {
+    members = ["Person A","Person B","Person C","Person D","Person E"];
+    history = [];
+    await setDoc(docRef, { members, history, lastFilledBy: "None", timestamp: 0, nextTurn: members[0] });
+  } else {
+    const data = snap.data();
+    members = data.members;
+    history = data.history || [];
+    if (history.length >= members.length) {
+      history = [];
+      await updateDoc(docRef, { history });
     }
-  } catch (error) {
-    console.error("Error loading data:", error);
-    alert("Failed to load data. Please try again.");
   }
-}
 
-// Handle button click
-async function markFilled() {
-  const select = document.getElementById("memberSelect");
-  const name = select.value;
-  if (!name) return alert("Please select your name");
+  const data = (await getDoc(docRef)).data();
+  document.getElementById("lastFilled").innerText =
+    `Last filled by: ${data.lastFilledBy} at ${new Date(data.timestamp).toLocaleString()}`;
+  document.getElementById("nextTurn").innerText = `Next turn: ${data.nextTurn}`;
 
-  try {
-    const currentIndex = members.indexOf(name);
-    const next = members[(currentIndex + 1) % members.length];
-
-    await setDoc(docRef, {
-      lastFilledBy: name,
-      timestamp: Date.now(),
-      nextTurn: next
-    });
-
-    select.value = ""; // Reset dropdown to default
-    await loadData();
-  } catch (error) {
-    console.error("Error updating data:", error);
-    alert("Failed to update. Please try again.");
-  }
-}
-
-// Init
-window.onload = () => {
   populateDropdown();
+  renderHistory();
+}
+
+// Handle fill action
+async function markFilled() {
+  const name = document.getElementById("memberSelect").value;
+  if (!name) return alert("Select your name");
+  if (history.some(e => e.name === name)) return alert(`${name} has already filled this round.`);
+
+  history.push({ name, timestamp: Date.now() });
+  const remaining = members.filter(m => !history.some(e => e.name === m));
+  const nextTurn = remaining[0] || members[0];
+
+  await updateDoc(docRef, {
+    lastFilledBy: name,
+    timestamp: Date.now(),
+    nextTurn,
+    history
+  });
+
   loadData();
-  document.getElementById("fillButton").addEventListener("click", markFilled);
-};
+}
+
+// Expose for inline onclicks and initialize
+window.markFilled = markFilled;
+window.addEventListener('DOMContentLoaded', loadData);
