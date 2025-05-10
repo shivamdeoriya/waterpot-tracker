@@ -4,12 +4,13 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstati
 
 // Firebase config (paste your config here)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDZePQEZqIGmquwnM7m6VS10wK3d4Fy3po",
+  authDomain: "water-pot-tracker.firebaseapp.com",
+  projectId: "water-pot-tracker",
+  storageBucket: "water-pot-tracker.firebasestorage.app",
+  messagingSenderId: "701527837249",
+  appId: "1:701527837249:web:0f7b594891455e350294c0",
+  measurementId: "G-WL94X6DP4Z"
 };
 
 // Initialize Firebase & Firestore
